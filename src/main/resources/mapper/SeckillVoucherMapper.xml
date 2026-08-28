@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartlife.mapper.SeckillVoucherMapper">
+
+    <resultMap id="BaseResultMap" type="com.smartlife.entity.SeckillVoucher">
+        <id column="voucher_id" property="voucherId"/>
+        <result column="stock" property="stock"/>
+        <result column="begin_time" property="beginTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectByVoucherId" resultMap="BaseResultMap">
+        SELECT voucher_id, stock, begin_time, end_time, create_time, update_time
+        FROM tb_seckill_voucher
+        WHERE voucher_id = #{voucherId}
+    </select>
+
+    <insert id="insert" parameterType="com.smartlife.entity.SeckillVoucher">
+        INSERT INTO tb_seckill_voucher (voucher_id, stock, begin_time, end_time)
+        VALUES (#{voucherId}, #{stock}, #{beginTime}, #{endTime})
+    </insert>
+
+    <!-- 乐观锁扣减：stock > 0 才能成功，数据库层最终兜底防超卖 -->
+    <update id="deductStock">
+        UPDATE tb_seckill_voucher
+        SET stock = stock - 1, update_time = NOW()
+        WHERE voucher_id = #{voucherId} AND stock &gt; 0
+    </update>
+</mapper>

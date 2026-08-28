@@ -1,0 +1,64 @@
+version: "3.8"
+
+# 本地一键启动依赖中间件：docker compose up -d mysql redis
+# 完整集群（含双实例应用 + Nginx）：docker compose --profile full up -d
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: smartlife-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: smartlife
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ../src/main/resources/db:/docker-entrypoint-initdb.d:ro
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_general_ci
+
+  redis:
+    image: redis:7.4
+    container_name: smartlife-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+
+  app1:
+    profiles: [ full ]
+    build: ..
+    environment: &app-env
+      MYSQL_HOST: mysql
+      REDIS_HOST: redis
+      AI_BASE_URL: ${AI_BASE_URL:-https://api.deepseek.com}
+      AI_API_KEY: ${AI_API_KEY:-sk-placeholder}
+      AI_MODEL: ${AI_MODEL:-deepseek-chat}
+      JWT_SECRET: ${JWT_SECRET:-smartlife-jwt-secret-please-change-me-in-production-0123456789}
+    depends_on:
+      - mysql
+      - redis
+
+  app2:
+    profiles: [ full ]
+    build: ..
+    environment: *app-env
+    depends_on:
+      - mysql
+      - redis
+
+  nginx:
+    profiles: [ full ]
+    image: nginx:1.27
+    container_name: smartlife-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app1
+      - app2
+
+volumes:
+  mysql-data:
+  redis-data:

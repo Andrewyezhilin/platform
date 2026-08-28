@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartlife.mapper.ShopMapper">
+
+    <resultMap id="BaseResultMap" type="com.smartlife.entity.Shop">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="type_id" property="typeId"/>
+        <result column="images" property="images"/>
+        <result column="area" property="area"/>
+        <result column="address" property="address"/>
+        <result column="x" property="x"/>
+        <result column="y" property="y"/>
+        <result column="avg_price" property="avgPrice"/>
+        <result column="sold" property="sold"/>
+        <result column="comments" property="comments"/>
+        <result column="score" property="score"/>
+        <result column="open_hours" property="openHours"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, type_id, images, area, address, x, y,
+        avg_price, sold, comments, score, open_hours, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM tb_shop WHERE id = #{id}
+    </select>
+
+    <select id="listAllIds" resultType="long">
+        SELECT id FROM tb_shop
+    </select>
+
+    <select id="selectByTypeId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM tb_shop
+        WHERE type_id = #{typeId}
+        ORDER BY score DESC, id
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="selectByName" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM tb_shop
+        WHERE name LIKE CONCAT('%', #{name}, '%')
+        ORDER BY score DESC, id
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <update id="update" parameterType="com.smartlife.entity.Shop">
+        UPDATE tb_shop
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="typeId != null">type_id = #{typeId},</if>
+            <if test="images != null">images = #{images},</if>
+            <if test="area != null">area = #{area},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="x != null">x = #{x},</if>
+            <if test="y != null">y = #{y},</if>
+            <if test="avgPrice != null">avg_price = #{avgPrice},</if>
+            <if test="sold != null">sold = #{sold},</if>
+            <if test="comments != null">comments = #{comments},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="openHours != null">open_hours = #{openHours},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartlife.mapper.FollowMapper">
+
+    <insert id="insert" parameterType="com.smartlife.entity.Follow">
+        INSERT INTO tb_follow (user_id, follow_user_id)
+        VALUES (#{userId}, #{followUserId})
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM tb_follow
+        WHERE user_id = #{userId} AND follow_user_id = #{followUserId}
+    </delete>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_follow
+        WHERE user_id = #{userId} AND follow_user_id = #{followUserId}
+    </select>
+
+    <select id="selectFansIds" resultType="long">
+        SELECT user_id
+        FROM tb_follow
+        WHERE follow_user_id = #{followUserId}
+    </select>
+</mapper>
