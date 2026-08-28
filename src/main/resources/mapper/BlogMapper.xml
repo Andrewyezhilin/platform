@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.smartlife.mapper.BlogMapper">
+
+    <resultMap id="BaseResultMap" type="com.smartlife.entity.Blog">
+        <id column="id" property="id"/>
+        <result column="shop_id" property="shopId"/>
+        <result column="user_id" property="userId"/>
+        <result column="title" property="title"/>
+        <result column="images" property="images"/>
+        <result column="content" property="content"/>
+        <result column="liked" property="liked"/>
+        <result column="comments" property="comments"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, shop_id, user_id, title, images, content,
+        liked, comments, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM tb_blog WHERE id = #{id}
+    </select>
+
+    <select id="selectHot" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM tb_blog
+        ORDER BY liked DESC, id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="selectByIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM tb_blog
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ORDER BY FIELD(id,
+        <foreach collection="ids" item="id" separator=",">
+            #{id}
+        </foreach>
+        )
+    </select>
+
+    <select id="selectByShopId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM tb_blog
+        WHERE shop_id = #{shopId}
+        ORDER BY liked DESC, id DESC
+        LIMIT #{size}
+    </select>
+
+    <insert id="insert" parameterType="com.smartlife.entity.Blog"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO tb_blog (shop_id, user_id, title, images, content, liked, comments)
+        VALUES (#{shopId}, #{userId}, #{title}, #{images}, #{content}, 0, 0)
+    </insert>
+
+    <update id="updateLiked">
+        UPDATE tb_blog SET liked = liked + #{delta} WHERE id = #{id}
+    </update>
+</mapper>
